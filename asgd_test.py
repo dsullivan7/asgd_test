@@ -32,8 +32,8 @@ if __name__ == '__main__':
 
     plt.close('all')
 
-    chunks = 100
-    n_iter = 2
+    chunks = 1
+    n_iter = 20
 
     # iris
     # iris = datasets.load_iris()
@@ -42,19 +42,24 @@ if __name__ == '__main__':
     # X = X[y < 2]
     # y = y[y < 2]
 
-    # X = np.array(p.read_csv('./data/leon_small_data.csv',
-    #                         nrows=5000,
-    #                         skipinitialspace=True,
-    #                         index_col=False,
-    #                         header=None,
-    #                         na_values=['<null>']).dropna())
+    X = np.array(p.read_csv('./data/leon_small_data.csv',
+                            nrows=5000,
+                            skipinitialspace=True,
+                            index_col=False,
+                            header=None,
+                            na_values=['<null>']).dropna())
 
-    # y = np.array(p.read_csv('./data/leon_small_label.csv',
-    #                         nrows=5000,
-    #                         skipinitialspace=True,
-    #                         index_col=False,
-    #                         header=None,
-    #                         na_values=['<null>']).dropna()).ravel()
+    y = np.array(p.read_csv('./data/leon_small_label.csv',
+                            nrows=5000,
+                            skipinitialspace=True,
+                            index_col=False,
+                            header=None,
+                            na_values=['<null>']).dropna()).ravel()
+
+    # X_test = X[4000:]
+    # y_test = y[4000:]
+    # X = X[:4000]
+    # y = y[:4000]
 
     # random
     # rng = np.random.RandomState(42)
@@ -72,19 +77,25 @@ if __name__ == '__main__':
     # y = np.dot(X, w)
     # y = np.sign(y)
 
-    n_samples, n_features = 1000, 20000
-    X = np.eye(n_samples, n_features)
-    y = np.random.random_integers(0, 1, n_samples).ravel()
-    y[y == 0] = 2
+    # n_samples, n_features = 2000, 20000
+    # rng = np.random.RandomState(42)
+    # X = np.eye(n_samples, n_features)
+    # w = rng.normal(size=n_features)
+    # y = np.dot(X, w)
+    # y = np.sign(y).ravel()
+    # y[y == -1] = 2
 
-    for i, j in enumerate(y):
-        X[i][i] = j
+    # X_test = X[500:]
+    # y_test = y[500:]
+    # X = X[:1500]
+    # y = y[:1500]
+    # X = sp.csr_matrix(X)
+
     classes = np.unique(y)
 
     x_chunks = np.array_split(X, chunks)
     y_chunks = np.array_split(y, chunks)
 
-    X = sp.csr_matrix(X)
 
     pobj_c = []
     pobj_ac = []
@@ -102,7 +113,7 @@ if __name__ == '__main__':
 
     model_c = linear_model.SGDClassifier(loss='log',
                                          learning_rate='constant',
-                                         eta0=.0001,
+                                         eta0=.00001,
                                          fit_intercept=False,
                                          n_iter=1, average=False)
 
@@ -114,33 +125,35 @@ if __name__ == '__main__':
 
     model_o = linear_model.SGDClassifier(loss='log',
                                          learning_rate='optimal',
-                                         eta0=.0001,
+                                         alpha=.09,
                                          fit_intercept=True,
                                          n_iter=1, average=False)
 
     avg_model_o = linear_model.SGDClassifier(loss='log',
                                              learning_rate='optimal',
-                                             eta0=.0006,
+                                             alpha=.0000001,
                                              fit_intercept=True,
                                              n_iter=1, average=True)
 
     model_i = linear_model.SGDClassifier(loss='log',
                                          learning_rate='invscaling',
-                                         eta0=.0001,
+                                         eta0=.1,
+                                         power_t=.6,
                                          fit_intercept=True,
                                          n_iter=1, average=False)
 
     avg_model_i = linear_model.SGDClassifier(loss='log',
                                              learning_rate='invscaling',
-                                             eta0=.0006,
+                                             eta0=1.,
+                                             power_t=.3,
                                              fit_intercept=True,
                                              n_iter=1, average=True)
 
     time1 = time.time()
     for i in range(n_iter):
         for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            x_chunk = sp.csr_matrix(x_chunk)
-            model_c.partial_fit(x_chunk, y_chunk, classes=classes)
+            # x_chunk = sp.csr_matrix(x_chunk)
+            model_c.partial_fit(x_chunk, y_chunk, classes)
             time2 = time.time()
             times_c.append(time2 - time1)
 
@@ -154,7 +167,7 @@ if __name__ == '__main__':
     time1 = time.time()
     for i in range(n_iter):
         for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            x_chunk = sp.csr_matrix(x_chunk)
+            # x_chunk = sp.csr_matrix(x_chunk)
             avg_model_c.partial_fit(x_chunk, y_chunk, classes=classes)
             time2 = time.time()
             times_ac.append(time2 - time1)
@@ -169,7 +182,7 @@ if __name__ == '__main__':
     time1 = time.time()
     for i in range(n_iter):
         for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            x_chunk = sp.csr_matrix(x_chunk)
+            # x_chunk = sp.csr_matrix(x_chunk)
             model_i.partial_fit(x_chunk, y_chunk, classes=classes)
             time2 = time.time()
             times_i.append(time2 - time1)
@@ -184,7 +197,7 @@ if __name__ == '__main__':
     time1 = time.time()
     for i in range(n_iter):
         for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            x_chunk = sp.csr_matrix(x_chunk)
+            # x_chunk = sp.csr_matrix(x_chunk)
             avg_model_i.partial_fit(x_chunk, y_chunk, classes=classes)
             time2 = time.time()
             times_ai.append(time2 - time1)
@@ -199,7 +212,7 @@ if __name__ == '__main__':
     time1 = time.time()
     for i in range(n_iter):
         for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            x_chunk = sp.csr_matrix(x_chunk)
+            # x_chunk = sp.csr_matrix(x_chunk)
             model_o.partial_fit(x_chunk, y_chunk, classes=classes)
             time2 = time.time()
             times_o.append(time2 - time1)
@@ -214,7 +227,7 @@ if __name__ == '__main__':
     time1 = time.time()
     for i in range(n_iter):
         for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            x_chunk = sp.csr_matrix(x_chunk)
+            # x_chunk = sp.csr_matrix(x_chunk)
             avg_model_o.partial_fit(x_chunk, y_chunk, classes=classes)
             time2 = time.time()
             times_ao.append(time2 - time1)
@@ -227,12 +240,18 @@ if __name__ == '__main__':
             pobj_ao.append(est)
 
     plt.rc('text', usetex=True)
-    plt.plot(times_c, pobj_c, label=r"SGD $f(eta) = eta$")
-    plt.plot(times_ac, pobj_ac, label=r'ASGD $f(eta) = eta$')
-    plt.plot(times_o, pobj_o, label=r'SGD $f(eta) = 1/(\alpha * t)$')
-    plt.plot(times_ao, pobj_ao, label=r'ASGD $f(eta) = 1/(\alpha * t)$')
-    plt.plot(times_i, pobj_i, label=r'SGD $f(eta) = eta/t^{power\_t}$')
-    plt.plot(times_ai, pobj_ai, label=r'ASGD $f(eta) = eta/t^{power\_t}$')
+    plt.plot(times_c, pobj_c, color='red',
+             label=r"$eta(t)=eta0, eta0=.00001$")
+    plt.plot(times_ac, pobj_ac, color='red',
+             linestyle='dashed', label=r'$eta(t) = eta0, eta0=.0006$')
+    plt.plot(times_o, pobj_o, color='blue',
+             label=r'$eta(t) = 1/(\alpha * t), \alpha=.09$')
+    plt.plot(times_ao, pobj_ao, color='blue',
+             linestyle='dashed', label=r'$eta(t) = 1/(\alpha * t), \alpha=.0000001$')
+    plt.plot(times_i, pobj_i, color='green',
+             label=r'$eta(t) = eta0/t^{power\_t}, eta0=.1, power_t=.6$')
+    plt.plot(times_ai, pobj_ai, color='green',
+             linestyle='dashed', label=r'$eta(t) = eta0/t^{power\_t}, eta0=1, power_t=.3$')
     plt.xlabel('time (seconds)')
     plt.ylabel('score')
     plt.legend(loc=0, prop={'size': 11})
