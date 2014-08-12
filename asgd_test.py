@@ -56,10 +56,10 @@ if __name__ == '__main__':
                             header=None,
                             na_values=['<null>']).dropna()).ravel()
 
-    # X_test = X[4000:]
-    # y_test = y[4000:]
-    # X = X[:4000]
-    # y = y[:4000]
+    X_test = X[4000:]
+    y_test = y[4000:]
+    X = X[:4000]
+    y = y[:4000]
 
     # random
     # rng = np.random.RandomState(42)
@@ -111,38 +111,38 @@ if __name__ == '__main__':
     times_i = []
     times_ai = []
 
-    model_c = linear_model.SGDClassifier(loss='log',
+    model_c = linear_model.SGDClassifier(loss='hinge',
                                          learning_rate='constant',
                                          eta0=.00001,
                                          fit_intercept=False,
                                          n_iter=1, average=False)
 
-    avg_model_c = linear_model.SGDClassifier(loss='log',
+    avg_model_c = linear_model.SGDClassifier(loss='hinge',
                                              learning_rate='constant',
                                              eta0=.0006,
                                              fit_intercept=True,
                                              n_iter=1, average=True)
 
-    model_o = linear_model.SGDClassifier(loss='log',
+    model_o = linear_model.SGDClassifier(loss='hinge',
                                          learning_rate='optimal',
                                          alpha=.09,
                                          fit_intercept=True,
                                          n_iter=1, average=False)
 
-    avg_model_o = linear_model.SGDClassifier(loss='log',
+    avg_model_o = linear_model.SGDClassifier(loss='hinge',
                                              learning_rate='optimal',
                                              alpha=.0000001,
                                              fit_intercept=True,
                                              n_iter=1, average=True)
 
-    model_i = linear_model.SGDClassifier(loss='log',
+    model_i = linear_model.SGDClassifier(loss='hinge',
                                          learning_rate='invscaling',
                                          eta0=.1,
                                          power_t=.6,
                                          fit_intercept=True,
                                          n_iter=1, average=False)
 
-    avg_model_i = linear_model.SGDClassifier(loss='log',
+    avg_model_i = linear_model.SGDClassifier(loss='hinge',
                                              learning_rate='invscaling',
                                              eta0=1.,
                                              power_t=.3,
@@ -161,7 +161,7 @@ if __name__ == '__main__':
             # est += model_c.intercept_
             # ls = list(map(log_loss, est, y))
             # pobj_c.append(np.mean(ls))
-            est = model_c.score(X, y)
+            est = model_c.score(X_test, y_test)
             pobj_c.append(est)
 
     time1 = time.time()
@@ -176,7 +176,7 @@ if __name__ == '__main__':
             # est += model_c.intercept_
             # ls = list(map(log_loss, est, y))
             # pobj_ac.append(np.mean(ls))
-            est = avg_model_c.score(X, y)
+            est = avg_model_c.score(X_test, y_test)
             pobj_ac.append(est)
 
     time1 = time.time()
@@ -191,7 +191,7 @@ if __name__ == '__main__':
             # est += model_i.intercept_
             # ls = list(map(log_loss, est, y))
             # pobj_i.append(np.mean(ls))
-            est = model_i.score(X, y)
+            est = model_i.score(X_test, y_test)
             pobj_i.append(est)
 
     time1 = time.time()
@@ -206,7 +206,7 @@ if __name__ == '__main__':
             # est += avg_model_i.intercept_
             # ls = list(map(log_loss, est, y))
             # pobj_ai.append(np.mean(ls))
-            est = avg_model_i.score(X, y)
+            est = avg_model_i.score(X_test, y_test)
             pobj_ai.append(est)
 
     time1 = time.time()
@@ -221,7 +221,7 @@ if __name__ == '__main__':
             # est += model_o.intercept_
             # ls = list(map(log_loss, est, y))
             # pobj_o.append(np.mean(ls))
-            est = model_o.score(X, y)
+            est = model_o.score(X_test, y_test)
             pobj_o.append(est)
 
     time1 = time.time()
@@ -236,7 +236,7 @@ if __name__ == '__main__':
             # est += avg_model_o.intercept_
             # ls = list(map(log_loss, est, y))
             # pobj_ao.append(np.mean(ls))
-            est = avg_model_o.score(X, y)
+            est = avg_model_o.score(X_test, y_test)
             pobj_ao.append(est)
 
     plt.rc('text', usetex=True)
