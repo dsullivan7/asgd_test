@@ -10,6 +10,9 @@ import pandas as p
 import scipy.sparse as sp
 import matplotlib.pyplot as plt
 
+# XXX : I cannot run it as I don't have the data
+# if you want demo on text you should use the 20 newsgroup
+
 if __name__ == '__main__':
 
     plt.close('all')

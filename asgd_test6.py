@@ -10,9 +10,11 @@ y = digits.target
 X = X[y < 2]
 y = y[y < 2]
 
+n_iter = 500  # XXX looks like it has no influence ... I don't get it.
+
 classifiers = [
-    ("SGD", SGDClassifier(n_iter=1, alpha=.1)),
-    ("ASGD", SGDClassifier(average=True, eta0=.001, n_iter=1)),
+    ("SGD", SGDClassifier(n_iter=n_iter, alpha=.1)),
+    ("ASGD", SGDClassifier(average=True, eta0=.001, n_iter=n_iter)),
 ]
 
 
@@ -24,10 +26,10 @@ class SquaredLoss():
 
 class Hinge():
     def loss(self, p, y):
-            z = p * y
-            if z <= 1.0:
-                return 1.0 - z
-            return 0.0
+        z = p * y
+        if z <= 1.0:
+            return 1.0 - z
+        return 0.0
 
 loss = Hinge()
 
@@ -53,7 +55,7 @@ for name, clf in classifiers:
             y_pred = clf.decision_function(X_train).ravel()
             # yy.append(1 - np.mean(y_pred == y_train))
             avg_score = np.mean(list(map(loss.loss, y_pred, y_train)))
-            avg_score += clf.alpha * np.linalg.norm(clf.coef_)
+            avg_score += clf.alpha * np.linalg.norm(clf.coef_) ** 2
             yy.append(avg_score)
     plt.plot(yy, label=name)
 

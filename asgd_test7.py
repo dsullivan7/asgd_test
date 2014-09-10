@@ -19,23 +19,17 @@ y = y[idx]
 classes = np.unique(y)
 
 clf1 = SGDClassifier(alpha=0.1, n_iter=1, average=True, eta0=0.001)
-clf2 = SGDClassifier(alpha=0.1, n_iter=1)
+clf2 = SGDClassifier(alpha=0.1, n_iter=1, average=True, eta0=0.001)
 score_1 = []
 score_2 = []
 
-for _ in range(100):
-    clf1.partial_fit(X, y, classes=classes)
-    clf2.partial_fit(X, y, classes=classes)
+XX = np.r_[X, X]
+yy = np.r_[y, y]
 
-    score_1.append(clf1.score(X, y))
-    score_2.append(clf2.score(X, y))
+clf1.partial_fit(X, y, classes=classes)
+clf1.partial_fit(X, y, classes=classes)
+# clf2.partial_fit(XX, yy, classes=classes)
+clf2.fit(XX, yy)
 
-
-plt.plot(score_1, color='red',
-         label=r'ASGD $\alpha=%s$' % clf1.alpha)
-
-plt.plot(score_2, color='red',
-         linestyle='dashed', label=r'SGD $\alpha=%s$' % clf2.alpha)
-
-plt.legend(loc=0, prop={'size': 11})
-plt.show()
+print clf1.score(X, y)
+print clf2.score(X, y)

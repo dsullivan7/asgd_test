@@ -111,27 +111,32 @@ if __name__ == '__main__':
     times_i = []
     times_ai = []
 
+    alpha = .09
+
     model_c = linear_model.SGDClassifier(loss='hinge',
                                          learning_rate='constant',
                                          eta0=.00001,
-                                         fit_intercept=False,
+                                         alpha=alpha,
+                                         fit_intercept=True,
                                          n_iter=1, average=False)
 
     avg_model_c = linear_model.SGDClassifier(loss='hinge',
                                              learning_rate='constant',
                                              eta0=.0006,
+                                             alpha=alpha,
                                              fit_intercept=True,
                                              n_iter=1, average=True)
 
     model_o = linear_model.SGDClassifier(loss='hinge',
                                          learning_rate='optimal',
-                                         alpha=.09,
+                                         alpha=alpha,
                                          fit_intercept=True,
                                          n_iter=1, average=False)
 
     avg_model_o = linear_model.SGDClassifier(loss='hinge',
                                              learning_rate='optimal',
-                                             alpha=.0000001,
+                                             alpha=alpha,
+                                             eta0=0.001,
                                              fit_intercept=True,
                                              n_iter=1, average=True)
 
@@ -139,6 +144,7 @@ if __name__ == '__main__':
                                          learning_rate='invscaling',
                                          eta0=.1,
                                          power_t=.6,
+                                         alpha=alpha,
                                          fit_intercept=True,
                                          n_iter=1, average=False)
 
@@ -146,9 +152,11 @@ if __name__ == '__main__':
                                              learning_rate='invscaling',
                                              eta0=1.,
                                              power_t=.3,
+                                             alpha=alpha,
                                              fit_intercept=True,
                                              n_iter=1, average=True)
 
+    # XXX : please use for loop rather than copy pasting
     time1 = time.time()
     for i in range(n_iter):
         for x_chunk, y_chunk in zip(x_chunks, y_chunks):

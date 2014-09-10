@@ -9,6 +9,8 @@ import pandas as p
 import scipy.sparse as sp
 import matplotlib.pyplot as plt
 
+# XXX : I cannot run it as I don't have the data
+
 if __name__ == '__main__':
 
     plt.close('all')
@@ -55,6 +57,8 @@ if __name__ == '__main__':
     times_ao = []
     times_i = []
     times_ai = []
+
+    # XXX : here again you need to use the same alpha for all models
 
     model_c = linear_model.SGDRegressor(loss='squared_loss',
                                         learning_rate='constant',
