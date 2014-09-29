@@ -44,22 +44,6 @@ if __name__ == '__main__':
     y_chunks = np.array_split(y, chunks)
 
 
-    pobj_c = []
-    pobj_ac = []
-    pobj_o = []
-    pobj_ao = []
-    pobj_i = []
-    pobj_ai = []
-
-    times_c = []
-    times_ac = []
-    times_o = []
-    times_ao = []
-    times_i = []
-    times_ai = []
-
-    # XXX : here again you need to use the same alpha for all models
-
     model_c = linear_model.SGDRegressor(loss='squared_loss',
                                         learning_rate='constant',
                                         eta0=.2,
@@ -74,13 +58,13 @@ if __name__ == '__main__':
 
     model_o = linear_model.SGDRegressor(loss='squared_loss',
                                         learning_rate='optimal',
-                                        alpha=.1,
+                                        alpha=.03,
                                         fit_intercept=True,
                                         n_iter=1, average=False)
 
     avg_model_o = linear_model.SGDRegressor(loss='squared_loss',
                                             learning_rate='optimal',
-                                            alpha=1.,
+                                            alpha=.03,
                                             fit_intercept=True,
                                             n_iter=1, average=True)
 
@@ -98,109 +82,28 @@ if __name__ == '__main__':
                                             fit_intercept=True,
                                             n_iter=1, average=True)
 
-    time1 = time.time()
-    for i in range(n_iter):
-        for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            # x_chunk = sp.csr_matrix(x_chunk)
-            model_c.partial_fit(x_chunk, y_chunk)
-            time2 = time.time()
-            times_c.append(time2 - time1)
+    models = [
+        (model_c, [], [], {'color': 'red', 'label': r"$eta(t)=eta0, eta0=.2$"}),
+        (avg_model_c, [], [], {"color": 'red', "linestyle": 'dashed', "label": r'$eta(t) = eta0, eta0=.2$'}),
+        (model_o, [], [], {"color": 'blue', "label": r'$eta(t) = 1/(\alpha * t), \alpha=.03$'}),
+        (avg_model_o, [], [], {"color": 'blue', "linestyle": 'dashed', "label": r'$eta(t) = 1/(\alpha * t), \alpha=.03$'}),
+        (model_i, [], [], {"color": 'green', "label": r'$eta(t) = eta0/t^{power\_t}, eta0=2.5, power_t=.6$'}),
+        (avg_model_i, [], [], {"color": 'green', "linestyle": 'dashed', "label": r'$eta(t) = eta0/t^{power\_t}, eta0=2.5, power_t=.6$'})
+    ]
 
-            # est = np.dot(X, model_c.coef_.T)
-            # est += model_c.intercept_
-            # ls = list(map(log_loss, est, y))
-            # pobj_c.append(np.mean(ls))
-            est = model_c.score(X_test, y_test)
-            pobj_c.append(est)
+    for model in models:
+        time1 = time.time()
+        for i in range(n_iter):
+            for x_chunk, y_chunk in zip(x_chunks, y_chunks):
+                model[0].partial_fit(x_chunk, y_chunk)
+                time2 = time.time()
+                model[1].append(time2 - time1)
+                est = model[0].score(X_test, y_test)
+                model[2].append(est)
 
-    time1 = time.time()
-    for i in range(n_iter):
-        for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            # x_chunk = sp.csr_matrix(x_chunk)
-            avg_model_c.partial_fit(x_chunk, y_chunk)
-            time2 = time.time()
-            times_ac.append(time2 - time1)
-
-            # est = np.dot(X, avg_model_c.coef_.T)
-            # est += model_c.intercept_
-            # ls = list(map(log_loss, est, y))
-            # pobj_ac.append(np.mean(ls))
-            est = avg_model_c.score(X_test, y_test)
-            pobj_ac.append(est)
-
-    time1 = time.time()
-    for i in range(n_iter):
-        for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            # x_chunk = sp.csr_matrix(x_chunk)
-            model_i.partial_fit(x_chunk, y_chunk)
-            time2 = time.time()
-            times_i.append(time2 - time1)
-
-            # est = np.dot(X, model_i.coef_.T)
-            # est += model_i.intercept_
-            # ls = list(map(log_loss, est, y))
-            # pobj_i.append(np.mean(ls))
-            est = model_i.score(X_test, y_test)
-            pobj_i.append(est)
-
-    time1 = time.time()
-    for i in range(n_iter):
-        for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            # x_chunk = sp.csr_matrix(x_chunk)
-            avg_model_i.partial_fit(x_chunk, y_chunk)
-            time2 = time.time()
-            times_ai.append(time2 - time1)
-
-            # est = np.dot(X, avg_model_i.coef_.T)
-            # est += avg_model_i.intercept_
-            # ls = list(map(log_loss, est, y))
-            # pobj_ai.append(np.mean(ls))
-            est = avg_model_i.score(X_test, y_test)
-            pobj_ai.append(est)
-
-    time1 = time.time()
-    for i in range(n_iter):
-        for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            # x_chunk = sp.csr_matrix(x_chunk)
-            model_o.partial_fit(x_chunk, y_chunk)
-            time2 = time.time()
-            times_o.append(time2 - time1)
-
-            # est = np.dot(X, model_o.coef_.T)
-            # est += model_o.intercept_
-            # ls = list(map(log_loss, est, y))
-            # pobj_o.append(np.mean(ls))
-            est = model_o.score(X_test, y_test)
-            pobj_o.append(est)
-
-    time1 = time.time()
-    for i in range(n_iter):
-        for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-            # x_chunk = sp.csr_matrix(x_chunk)
-            avg_model_o.partial_fit(x_chunk, y_chunk)
-            time2 = time.time()
-            times_ao.append(time2 - time1)
-
-            # est = np.dot(X, avg_model_o.coef_.T)
-            # est += avg_model_o.intercept_
-            # ls = list(map(log_loss, est, y))
-            # pobj_ao.append(np.mean(ls))
-            est = avg_model_o.score(X_test, y_test)
-            pobj_ao.append(est)
+        plt.plot(model[1], model[2], **model[3])
 
     plt.rc('text', usetex=True)
-    plt.plot(times_c, pobj_c, color='red',
-             label=r"$eta(t)=eta0, eta0=.2$")
-    plt.plot(times_ac, pobj_ac, color='red',
-             linestyle='dashed', label=r'$eta(t) = eta0, eta0=.2$')
-    plt.plot(times_o, pobj_o, color='blue',
-             label=r'$eta(t) = 1/(\alpha * t), \alpha=.1$')
-    # plt.plot(times_ao[10:], pobj_ao[10:], color='blue',
-    #          linestyle='dashed', label=r'$eta(t) = 1/(\alpha * t), \alpha=.0000001$')
-    plt.plot(times_i, pobj_i, color='green',
-             label=r'$eta(t) = eta0/t^{power\_t}, eta0=2.5, power_t=.6$')
-    plt.plot(times_ai, pobj_ai, color='green',
-             linestyle='dashed', label=r'$eta(t) = eta0/t^{power\_t}, eta0=2.5, power_t=.6$')
     plt.xlabel('time (seconds)')
     plt.ylabel('score')
     plt.legend(loc=0, prop={'size': 11})
