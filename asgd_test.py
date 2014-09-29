@@ -119,7 +119,7 @@ if __name__ == '__main__':
                                          n_iter=1, average=False)
 
     avg_model_o = linear_model.SGDClassifier(loss='hinge',
-                                   git           learning_rate='optimal',
+                                             learning_rate='optimal',
                                              alpha=.000001,
                                              fit_intercept=True,
                                              n_iter=1, average=True)
