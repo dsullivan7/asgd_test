@@ -18,8 +18,8 @@ X = X[idx]
 y = y[idx]
 classes = np.unique(y)
 
-clf1 = SGDClassifier(alpha=0.1, n_iter=1, average=True, eta0=0.001)
-clf2 = SGDClassifier(alpha=0.1, n_iter=1)
+clf1 = SGDClassifier(alpha=0.01, n_iter=1, average=True)
+clf2 = SGDClassifier(alpha=0.01, n_iter=1)
 score_1 = []
 score_2 = []
 
