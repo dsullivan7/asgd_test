@@ -18,12 +18,16 @@ X = X[idx]
 y = y[idx]
 classes = np.unique(y)
 
-clf1 = SGDClassifier(alpha=0.01, n_iter=1, average=True)
-clf2 = SGDClassifier(alpha=0.01, n_iter=1)
+alpha = 1.
+
+clf1 = SGDClassifier(alpha=alpha, n_iter=1, average=True)
+clf2 = SGDClassifier(alpha=alpha, n_iter=1)
 score_1 = []
 score_2 = []
 
-for _ in range(100):
+# XXX average = 10 to activate averaging after 10 epochs???
+
+for _ in range(500):
     clf1.partial_fit(X, y, classes=classes)
     clf2.partial_fit(X, y, classes=classes)
 

@@ -96,32 +96,34 @@ if __name__ == '__main__':
     x_chunks = np.array_split(X, chunks)
     y_chunks = np.array_split(y, chunks)
 
-    alpha = .09
+    # alpha = .09
+    alpha = 1.
+    fit_intercept = True
 
     model_c = linear_model.SGDClassifier(loss='hinge',
                                          learning_rate='constant',
                                          eta0=.00001,
                                          alpha=alpha,
-                                         fit_intercept=True,
+                                         fit_intercept=fit_intercept,
                                          n_iter=1, average=False)
 
     avg_model_c = linear_model.SGDClassifier(loss='hinge',
                                              learning_rate='constant',
                                              eta0=.0006,
                                              alpha=alpha,
-                                             fit_intercept=True,
+                                             fit_intercept=fit_intercept,
                                              n_iter=1, average=True)
 
     model_o = linear_model.SGDClassifier(loss='hinge',
                                          learning_rate='optimal',
                                          alpha=alpha,
-                                         fit_intercept=True,
+                                         fit_intercept=fit_intercept,
                                          n_iter=1, average=False)
 
     avg_model_o = linear_model.SGDClassifier(loss='hinge',
                                              learning_rate='optimal',
-                                             alpha=.000001,
-                                             fit_intercept=True,
+                                             alpha=alpha,
+                                             fit_intercept=fit_intercept,
                                              n_iter=1, average=True)
 
     model_i = linear_model.SGDClassifier(loss='hinge',
@@ -129,7 +131,7 @@ if __name__ == '__main__':
                                          eta0=.1,
                                          power_t=.6,
                                          alpha=alpha,
-                                         fit_intercept=True,
+                                         fit_intercept=fit_intercept,
                                          n_iter=1, average=False)
 
     avg_model_i = linear_model.SGDClassifier(loss='hinge',
@@ -141,26 +143,23 @@ if __name__ == '__main__':
                                              n_iter=1, average=True)
 
     models = [
-        (model_c, [], [], {'color': 'red', 'label': r"$eta(t)=eta0, eta0=.00001$"}),
-        (avg_model_c, [], [], {"color": 'red', "linestyle": 'dashed', "label": r'$eta(t) = eta0, eta0=.0006$'}),
-        (model_o, [], [], {"color": 'blue', "label": r'$eta(t) = 1/(\alpha * t), \alpha=.09$'}),
-        (avg_model_o, [], [], {"color": 'blue', "linestyle": 'dashed', "label": r'$eta(t) = 1/(\alpha * t), \alpha=.0000001$'}),
+        (model_c, [], [], {'color': 'red', 'label': r"$eta(t)=.00001$"}),
+        (avg_model_c, [], [], {"color": 'red', "linestyle": 'dashed', "label": r'$eta(t)=.0006$'}),
+        (model_o, [], [], {"color": 'blue', "label": r'$eta(t) = 1/(\alpha * t)$'}),
+        (avg_model_o, [], [], {"color": 'blue', "linestyle": 'dashed', "label": r'$eta(t) = 1/(\alpha * t)$'}),
         (model_i, [], [], {"color": 'green', "label": r'$eta(t) = eta0/t^{power\_t}, eta0=.1, power_t=.6$'}),
         (avg_model_i, [], [], {"color": 'green', "linestyle": 'dashed', "label": r'$eta(t) = eta0/t^{power\_t}, eta0=.005, power_t=.3$'})
     ]
 
-    for model in models:
+    for clf, timing, scores, plot_params in models:
         time1 = time.time()
         for i in range(n_iter):
             for x_chunk, y_chunk in zip(x_chunks, y_chunks):
-                model[0].partial_fit(x_chunk, y_chunk, classes)
-                time2 = time.time()
-                model[1].append(time2 - time1)
-                est = model[0].score(X_test, y_test)
-                model[2].append(est)
+                clf.partial_fit(x_chunk, y_chunk, classes)
+                timing.append(time.time() - time1)
+                scores.append(clf.score(X_test, y_test))
 
-        plt.plot(model[1], model[2], **model[3])
-
+        plt.plot(timing, scores, **plot_params)
 
 
     plt.rc('text', usetex=True)

@@ -10,11 +10,14 @@ y = digits.target
 X = X[y < 2]
 y = y[y < 2]
 
-n_iter = 500  # XXX looks like it has no influence ... I don't get it.
+n_iter = 1000  # XXX looks like it has no influence ... I don't get it.
+
+alpha = .001
 
 classifiers = [
-    ("SGD", SGDClassifier(n_iter=n_iter, alpha=.1)),
-    ("ASGD", SGDClassifier(average=True, eta0=.001, n_iter=n_iter)),
+    ("SGD", SGDClassifier(n_iter=n_iter, alpha=alpha)),
+    ("ASGD", SGDClassifier(n_iter=n_iter, alpha=alpha, average=True)),
+    ("ASGD2", SGDClassifier(n_iter=n_iter, alpha=alpha, average=True, learning_rate='constant', eta0=.001)),
 ]
 
 
@@ -34,27 +37,25 @@ class Hinge():
 loss = Hinge()
 
 chunks = 3
-n_iter = 30
+n_epochs = 30
 X_train = X
 y_train = y
 classes = np.unique(y)
+
+# X_train, X_test, y_train, y_test = train_test_split(digits.data,
+#                                                     digits.target,
+#                                                     test_size=.10)
+
 for name, clf in classifiers:
-
-    # X_train, X_test, y_train, y_test = train_test_split(digits.data,
-    #                                                     digits.target,
-    #                                                     test_size=.10)
-
-
     x_chunks = np.array_split(X_train, chunks)
     y_chunks = np.array_split(y_train, chunks)
     yy = []
 
-    for j in range(n_iter):
+    for j in range(n_epochs):
         for x_chunk, y_chunk in zip(x_chunks, y_chunks):
             clf.partial_fit(x_chunk, y_chunk, classes=classes)
-            y_pred = clf.decision_function(X_train).ravel()
-            # yy.append(1 - np.mean(y_pred == y_train))
-            avg_score = np.mean(list(map(loss.loss, y_pred, y_train)))
+            df = clf.decision_function(X_train).ravel()
+            avg_score = np.mean(list(map(loss.loss, df, y_train)))
             avg_score += clf.alpha * np.linalg.norm(clf.coef_) ** 2
             yy.append(avg_score)
     plt.plot(yy, label=name)
