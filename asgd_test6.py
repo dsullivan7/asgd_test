@@ -37,7 +37,7 @@ class Hinge():
 loss = Hinge()
 
 chunks = 3
-n_epochs = 30
+n_epochs = 100
 X_train = X
 y_train = y
 classes = np.unique(y)
